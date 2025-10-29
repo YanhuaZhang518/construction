@@ -1,143 +1,160 @@
-# prompts-for-codex.md — English Prompt Pack for Codex / Copilot
+You are a senior full-stack engineer building a production-grade SaaS web application for a renovation company.
 
-> Use these prompts inside your VSCode, Cursor, or GitHub Copilot chat to generate and refine code for your **Next.js + Prisma Renovation Company App** (方案 A).  Each prompt is designed to produce production-grade, type-safe code.
-
----
-
-## 🧱 1. Project-Level Prompt
-
-```markdown
-You are building a full-stack web application for a small renovation company.
-The tech stack is:
+Tech Stack:
 - Next.js 15 (App Router) + TypeScript
+- React Server Components preferred
+- Server Actions when possible
 - Tailwind CSS + shadcn/ui
 - Prisma ORM + PostgreSQL (Supabase/Neon)
-- Auth.js (NextAuth) for authentication
-- UploadThing + S3-compatible storage (R2/Supabase)
-- Resend (email) + Twilio (SMS)
-- Sentry for error tracking, Plausible for analytics
+- Auth.js (NextAuth)
+- UploadThing + S3-compatible storage
+- Resend (email)
+- Twilio (SMS)
+- Sentry (error tracking)
+- Plausible (analytics)
+- Zod (validation)
+- Drizzle-like schema patterns
+- @vercel/og (OpenGraph images)
+- Docker support
 
-The app includes:
-- Marketing pages (SEO-friendly service, area, and case pages)
-- Contact/quote request form with file upload
-- Admin dashboard (leads, projects, estimates, assets, reviews)
-- CRM-style pipeline (lead → appointment → project → quote)
-- Simple CMS for cases and blog posts
+Functional Requirements:
+- Public marketing pages (SEO / structured data)
+- Contact/quote form with file upload
+- CRM pipeline (lead → appointment → project → quote)
+- Admin dashboard
+- Simple CMS for case studies, blog
+- Review system
+- Assets library
 
-Always write clean, production-ready code with:
-- Strong typing (TypeScript)
-- Zod validation for API inputs
-- Prisma for DB access
-- React server components and server actions when possible
-- Modular structure (lib/, components/, app/api/, etc.)
-```
+Output Requirements:
+- Production-ready code
+- Strong TypeScript types
+- Zod for all input validation
+- Proper error handling and soft-fail patterns
+- Prismically clean Prisma queries
+- Idempotent server actions
+- Atomic database operations
+- Suspense-friendly server components
+- Modular file structure (lib/, components/, app/api/)
+- Include all import statements
+- Avoid placeholder values
+- Avoid “...” ellipses in code
 
----
+When modifying existing files:
+- Show full file content
+- Specify file path headings (e.g. `app/dashboard/page.tsx`)
 
-## ⚙️ 2. Component Prompt
+Think step-by-step.
+Create a client-side React form component for submitting renovation leads.
 
-```text
-Create a React client component using Next.js and TypeScript that implements a form for submitting renovation leads.
-Use react-hook-form with zod validation, Tailwind classes for styling, and POST the data to /api/leads.
-Include inline validation messages and a success alert.
-```
+Requirements:
+- Next.js 15 + TypeScript
+- react-hook-form + @hookform/resolvers/zod
+- Zod validation schema (exported)
+- Form fields: name, email, phone, city, budget, notes
+- POST to /api/leads via fetch
+- Display inline validation messages
+- Success toast using shadcn/ui <Toast>
+- Loading state on submit button
+- Tailwind styling, semantic markup
+- Accessible form labels & aria attributes
 
----
+Also export the Zod schema and types.
 
-## 🧩 3. API Route Prompt
+Generate a Next.js App Router API route at `app/api/leads/route.ts`.
 
-```text
-Generate a Next.js App Router API route (/api/leads/route.ts) using Prisma ORM.
-It should accept a POST request with lead data (name, email, phone, city, budget, notes),
-validate using zod, create a new Lead in the database,
-and send an email via Resend and an SMS via Twilio to confirm receipt.
-Return a JSON response with the new lead ID.
-```
+Requirements:
+- Accept POST JSON payload
+- Import Zod schema from the lead form
+- Validate payload with safeParse
+- Create Lead using Prisma
+- Send confirmation email via Resend
+- Send SMS via Twilio
+- Log errors to Sentry
+- Return { id, status: "ok" }
+- Handle all failures gracefully with 400/500 codes
+- Use proper HTTP semantics
+Expand the Prisma schema to add:
+Review
+ServiceArea
+Case
+Asset
 
----
+Rules:
+- Prefer explicit relations
+- Use referential actions
+- Add createdAt, updatedAt
+- Index frequently queried fields
+- Use Enum where appropriate
+- Add relation from Lead -> Review? (optional)
+- Materialize published flag
 
-## 🗂 4. Prisma Schema Expansion Prompt
+After editing:
+- Show final entire schema
+- Highlight new indexes
+Implement a Kanban-style Lead pipeline at `app/(dashboard)/leads/page.tsx`.
 
-```text
-Expand the existing Prisma schema to include:
-- Review model (customer reviews with rating, content, source, published flag)
-- ServiceArea model (for SEO landing pages)
-- Case model (for project showcase with cover image, duration, materials)
-Make sure all relations are properly defined with referential integrity.
-```
+Requirements:
+- Server Component loading board data
+- Use @hello-pangea/dnd for drag-drop
+- Columns: new, contacted, appointment, quoted, closed
+- Cards show: name, city, budget, updatedAt (relative)
+- Drag updates status via a server action
+- Optimistic UI
+- shadcn/ui components
+- Accessibility safe
 
----
+- Create a drag-and-drop uploader component using UploadThing.
 
-## 🧠 5. Admin Dashboard Prompt
+Requirements:
+- Client component
+- Restrict to image/jpeg, image/png, image/webp
+- Max 10MB
+- Show thumbnail previews
+- On success: server action to persist URL in Prisma Asset model
+- Return uploaded asset IDs
+- Toast success and error
 
-```text
-Implement an Admin Dashboard page (app/(dashboard)/leads/page.tsx)
-that displays leads in a Kanban board layout by status.
-Use shadcn/ui components and @hello-pangea/dnd for drag-and-drop between columns.
-Each card should show name, city, budget, and last update time.
-```
+- Generate a server-only utility using React-PDF that:
 
----
+- Renders company header/footer
+- Shows customer info
+- Itemized table (name, qty, unit price, line total)
+- Summaries and tax
+- Automatic totals
+- Export PDF to storage (UploadThing/S3)
+- Return public download URL
 
-## 📤 6. File Upload Prompt
+Include:
+- Strong TypeScript types
+- Currency formatting util
 
-```text
-Create a file upload component using UploadThing with drag-and-drop support.
-Limit uploads to 10MB images (jpg, png, webp).
-After upload, store the resulting URL in the database using Prisma.
-```
+Extend Auth.js:
+- Credentials and Google provider
+- Add User.role enum: ADMIN, SALES, FOREMAN
 
----
+Add middleware:
+- Restrict /app/(dashboard) to authenticated
+- Route-based RBAC check
+- Redirect 403 to /not-authorized
 
-## 🧾 7. PDF Quote Generator Prompt
+Implement a `currentUser()` helper in lib/auth.
 
-```text
-Generate a server-side utility that creates a project estimate PDF
-using react-pdf or puppeteer. Include client info, itemized table (name, qty, unit price, total),
-and company header/footer. Export a downloadable PDF link.
-```
+Add structured data JSON-LD for LocalBusiness, Review.
 
----
+Requirements:
+- Use <Script type="application/ld+json">
+- Generate canonical URLs
+- Dynamic OG metadata using generateMetadata()
+- Build sitemap using `app/sitemap.ts`
+- Include lastModified from DB queries
 
-## 🧰 8. Auth + RBAC Prompt
+Write a Vercel deployment config:
 
-```text
-Integrate Auth.js (NextAuth) with credentials and Google provider.
-Extend the User model with a 'role' field ('ADMIN', 'SALES', 'FOREMAN'),
-and create a middleware to restrict access to /app/(dashboard) routes to authenticated users only.
-```
-
----
-
-## 🔍 9. SEO & Structured Data Prompt
-
-```text
-Add structured data (JSON-LD) for LocalBusiness and Reviews
-on marketing pages using Next.js Script component.
-Generate canonical URLs, OpenGraph metadata, and sitemaps automatically.
-```
-
----
-
-## 🚀 10. Deployment Prompt
-
-```text
-Write a Vercel deployment configuration for this Next.js app.
-Use environment variables for database, email, SMS, and S3 keys.
-Ensure Prisma migration runs on build and that static marketing pages are ISR-enabled.
-```
-
----
-
-## 💡 Bonus – Quick Codex Commands
-
-> Use these short chat prompts for Copilot Chat / Cursor:
-
-* “Generate a zod schema and form validation for the renovation lead form.”
-* “Create a server action that inserts a new project and sends an email notification.”
-* “Add drag-and-drop support to the leads Kanban view.”
-* “Refactor this component to use shadcn/ui Card and Button components.”
-* “Add proper TypeScript types for Prisma Project entity and related API routes.”
-
----
+- Add env var schema (Zod)
+- Check presence at build time
+- Enable ISR for marketing pages
+- Database connection pool tips
+- Run prisma migrate on postinstall
+- Add OG image route caching headers
 
